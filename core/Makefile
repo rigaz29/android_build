@@ -1324,6 +1324,15 @@ endif
 
 INTERNAL_BOOTIMAGE_FILES := $(filter-out --%,$(INTERNAL_BOOTIMAGE_ARGS))
 
+# Perangkat Qualcomm legacy menyerahkan tabel device tree lewat mkbootimg --dt
+# (BOARD_MKBOOTIMG_ARGS). Berkasnya dibangun vendor/lineage/build/tasks/dt_image.mk,
+# yang disertakan SETELAH berkas ini, jadi INSTALLED_DTIMAGE_TARGET masih kosong di
+# sini -- jalurnya dirujuk langsung. Aturan pembuatnya boleh muncul belakangan.
+BOOTIMAGE_EXTRA_DEPS :=
+ifeq (true,$(strip $(BOARD_KERNEL_SEPARATED_DT)))
+  BOOTIMAGE_EXTRA_DEPS += $(PRODUCT_OUT)/dt.img
+endif
+
 # kernel cmdline/base/pagesize in boot.
 # - If using GKI, use GENERIC_KERNEL_CMDLINE. Remove kernel base and pagesize because they are
 #   device-specific.
@@ -1364,7 +1373,7 @@ define build_boot_board_avb_enabled
   $(call build_boot_from_kernel_avb_enabled,$(1),$(kernel))
 endef
 
-$(INSTALLED_BOOTIMAGE_TARGET): $(MKBOOTIMG) $(AVBTOOL) $(INTERNAL_BOOTIMAGE_FILES) $(BOARD_AVB_BOOT_KEY_PATH)
+$(INSTALLED_BOOTIMAGE_TARGET): $(MKBOOTIMG) $(AVBTOOL) $(INTERNAL_BOOTIMAGE_FILES) $(BOARD_AVB_BOOT_KEY_PATH) $(BOOTIMAGE_EXTRA_DEPS)
 	$(call pretty,"Target boot image: $@")
 	$(call build_boot_board_avb_enabled,$@)
 
@@ -1386,7 +1395,7 @@ define build_boot_novboot
   $(call assert-max-image-size,$1,$(call get-bootimage-partition-size,$(1),boot))
 endef
 
-$(INSTALLED_BOOTIMAGE_TARGET): $(MKBOOTIMG) $(INTERNAL_BOOTIMAGE_FILES)
+$(INSTALLED_BOOTIMAGE_TARGET): $(MKBOOTIMG) $(INTERNAL_BOOTIMAGE_FILES) $(BOOTIMAGE_EXTRA_DEPS)
 	$(call pretty,"Target boot image: $@")
 	$(call build_boot_novboot,$@)
 
