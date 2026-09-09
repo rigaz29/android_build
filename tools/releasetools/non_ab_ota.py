@@ -565,8 +565,12 @@ def GenerateNonAbOtaPackage(target_file, output_file, source_file=None):
       OPTIONS.input_tmp = target_file
       tmpfile = common.MakeTempFile(suffix=".zip")
       os.unlink(tmpfile)
+      # -y WAJIB: simpan symlink sebagai symlink, jangan diikuti. Tanpa itu
+      # zip mengikuti RECOVERY/RAMDISK/d -> /sys/kernel/debug dan mengarsipkan
+      # debugfs milik HOST yang sedang hidup. Bandingkan
+      # sign_target_files_apks.py:1797 dan 1799, keduanya sudah memakai -y.
       common.RunAndCheckOutput(
-          ["zip", tmpfile, "-r", ".", "-0"], cwd=target_file)
+          ["zip", tmpfile, "-y", "-r", ".", "-0"], cwd=target_file)
       assert zipfile.is_zipfile(tmpfile)
       target_file = tmpfile
 
