@@ -449,7 +449,11 @@ class BuildInfo(object):
           "system_other"] = self._partition_fingerprints["system"]
 
     # These two should be computed only after setting self._oem_props.
-    self._device = self.GetOemProperty("ro.product.device")
+    # ota_override_device memuat daftar kode perangkat yang dipisah koma, dari
+    # TARGET_OTA_ASSERT_DEVICE. Diperlukan perangkat yang satu device tree-nya
+    # melayani beberapa varian, misalnya A37/A37f/A37fw/A37m.
+    self._device = self.info_dict.get("ota_override_device",
+                                      self.GetOemProperty("ro.product.device"))
     self._fingerprint = self.CalculateFingerprint()
     check_fingerprint(self._fingerprint)
 

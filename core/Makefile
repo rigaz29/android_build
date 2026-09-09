@@ -6098,6 +6098,9 @@ $(INSTALLED_MISC_INFO_TARGET):
 	$(call pretty,"Target misc_info.txt: $@")
 	$(hide) echo "recovery_api_version=$(RECOVERY_API_VERSION)" >> $@
 	$(hide) echo "fstab_version=$(RECOVERY_FSTAB_VERSION)" >> $@
+ifneq ($(TARGET_OTA_ASSERT_DEVICE),)
+	$(hide) echo "ota_override_device=$(TARGET_OTA_ASSERT_DEVICE)" >> $@
+endif
 ifdef BOARD_FLASH_BLOCK_SIZE
 	$(hide) echo "blocksize=$(BOARD_FLASH_BLOCK_SIZE)" >> $@
 endif
